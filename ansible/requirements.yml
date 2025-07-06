@@ -1,0 +1,8 @@
+---
+collections:
+  - name: kubernetes.core
+    version: ">=2.4.0"
+
+roles:
+  - name: xanmanning.k3s
+    version: ">=3.4.0"
