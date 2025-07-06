@@ -1,0 +1,20 @@
+---
+# Ansible Galaxy Requirements for K3s Infrastructure
+# Install with: ansible-galaxy install -r requirements.yml
+
+collections:
+  - name: kubernetes.core
+    version: ">=2.4.0"
+
+roles:
+  # K3s installation and management
+  - name: xanmanning.k3s
+    version: ">=3.4.0"
+    
+  # AWS CloudWatch monitoring agent
+  - name: cisagov.cloudwatch_agent
+    version: ">=1.0.0"
+    
+  # Optional: FluxCD for GitOps (production environments)
+  - name: fluxcd.flux
+    version: ">=0.1.0" 
