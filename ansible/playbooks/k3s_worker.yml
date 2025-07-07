@@ -5,6 +5,12 @@
 
   vars:
     k3s_version: "v1.28.5+k3s1"
+    k3s_url: "{{ k3s_url | default('') }}"
+    k3s_token: "{{ k3s_token | default('') }}"
+    node_labels: "{{ node_labels | default('env=edge') }}"
+    agent_extra_args: "{{ agent_extra_args | default('') }}"
+    whatsapp_server_image_uri: "{{ whatsapp_server_image_uri | default('') }}"
+    environment: "{{ environment | default('production') }}"
     whatsapp_image: "{{ whatsapp_server_image_uri }}"
     whatsapp_namespace: "whatsapp"
 
@@ -38,8 +44,8 @@
         k3s_release_version: "{{ k3s_version }}"
         k3s_server_url: "{{ k3s_url }}"
         k3s_token: "{{ k3s_token }}"
-        k3s_agent_extra_args: "{{ agent_extra_args | default('') }}"
-        k3s_agent_node_labels: "{{ node_labels | default('env=edge') }}"
+        k3s_agent_extra_args: "{{ agent_extra_args }}"
+        k3s_agent_node_labels: "{{ node_labels }}"
         k3s_use_experimental: false
 
   post_tasks:

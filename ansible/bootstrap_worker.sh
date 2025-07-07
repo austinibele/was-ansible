@@ -14,6 +14,15 @@
 
 set -euxo pipefail
 
+# Environment variable definitions with defaults
+K3S_URL=${K3S_URL:-""}
+K3S_TOKEN=${K3S_TOKEN:-""}
+NODE_LABELS=${NODE_LABELS:-"env=edge,tenant=test"}
+AGENT_EXTRA_ARGS=${AGENT_EXTRA_ARGS:-"--flannel-backend=wireguard-native"}
+WHATSAPP_SERVER_IMAGE_URI=${WHATSAPP_SERVER_IMAGE_URI:-""}
+FORCE_UPDATE_DEPS=${FORCE_UPDATE_DEPS:-"false"}
+ENVIRONMENT=${ENVIRONMENT:-"production"}
+
 # ▶ 1. Update ansible dependencies if needed ------------------------
 if [ "${FORCE_UPDATE_DEPS:-false}" = "true" ] || [ ! -f /root/.ansible_deps_installed ]; then
   echo "Updating Ansible Galaxy dependencies..."
@@ -38,4 +47,5 @@ ansible-pull \
   -e "k3s_token=$K3S_TOKEN" \
   -e "node_labels=$NODE_LABELS" \
   -e "agent_extra_args=$AGENT_EXTRA_ARGS" \
-  -e "whatsapp_server_image_uri=${WHATSAPP_SERVER_IMAGE_URI:-}"
+  -e "whatsapp_server_image_uri=${WHATSAPP_SERVER_IMAGE_URI:-}" \
+  -e "environment=$ENVIRONMENT"
