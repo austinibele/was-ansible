@@ -30,7 +30,7 @@ cd /tmp
 # ▶ 3. Run the Ansible pull-mode playbook ---------------------------
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
-  ansible/playbooks/k3s_server.yml \
+  ansible/server/k3s_server.yml \
   -l localhost \
   -e "environment=${ENVIRONMENT:-prod}" \
   -e "server_extra_args=${SERVER_EXTRA_ARGS:-}" 

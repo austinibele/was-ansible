@@ -9,7 +9,7 @@ ENVIRONMENT=${ENVIRONMENT:-"test"}
 SERVER_EXTRA_ARGS=${SERVER_EXTRA_ARGS:-"--token ${K3S_TOKEN}"}
 FORCE_UPDATE_DEPS=${FORCE_UPDATE_DEPS:-"false"}
 SCRIPT_START="$(date +%s%N)"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SERVER_CONTAINER="was-ansible-server-${SCRIPT_START}"
 
 cleanup() {

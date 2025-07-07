@@ -39,7 +39,7 @@ cd /tmp
 # ▶ 3. Run the Ansible pull-mode playbook ---------------------------
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
-  ansible/playbooks/k3s_worker.yml \
+  ansible/worker/k3s_worker.yml \
   -i "localhost," \
   -l localhost \
   -c local \
