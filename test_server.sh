@@ -49,8 +49,8 @@ docker exec "${SERVER_CONTAINER}" bash /workspace/ansible/bootstrap_server.sh
 SERVER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${SERVER_CONTAINER}")
 K3S_URL="https://${SERVER_IP}:6443"
 
-echo "[+] Waiting for K3s control-plane to report Ready node ..."
-if ! docker exec "${SERVER_CONTAINER}" bash -c 'for i in {1..36}; do k3s kubectl get nodes --no-headers 2>/dev/null | grep -q "Ready" && exit 0; sleep 5; done; exit 1'; then
+echo "[+] Waiting for K3s server node to become Ready ..."
+if ! docker exec "${SERVER_CONTAINER}" bash -c 'for i in {1..36}; do k3s kubectl get nodes --no-headers 2>/dev/null | grep -q "k3s-server.*Ready" && exit 0; sleep 5; done; exit 1'; then
   echo "❌ K3s control-plane did not become Ready in 3 minutes" && exit 1
 fi
 
@@ -59,8 +59,46 @@ docker cp "${SERVER_CONTAINER}:/etc/rancher/k3s/k3s.yaml" "${REPO_ROOT}/k3s-serv
 
 echo ""
 echo "✅ Control-plane ready!"
-echo "Export these variables then run ./test_worker.sh:" && echo ""
-echo "export NETWORK_NAME=${NETWORK_NAME}"
-echo "export K3S_URL=${K3S_URL}"
-echo "export K3S_TOKEN=${K3S_TOKEN}"
-echo "export SERVER_CONTAINER=${SERVER_CONTAINER}" 
+echo ""
+echo "============================================================"
+echo "  WORKER CONNECTION PARAMETERS"
+echo "============================================================"
+echo "To start a worker node, run ./test_worker.sh with these values:"
+echo ""
+echo "Network Name:      ${NETWORK_NAME}"
+echo "K3S URL:           ${K3S_URL}"
+echo "K3S Token:         ${K3S_TOKEN}"
+echo "Server Container:  ${SERVER_CONTAINER}"
+echo ""
+echo "You can either:"
+echo "  1) Export these as environment variables:"
+echo "     export NETWORK_NAME='${NETWORK_NAME}'"
+echo "     export K3S_URL='${K3S_URL}'"
+echo "     export K3S_TOKEN='${K3S_TOKEN}'"
+echo "     export SERVER_CONTAINER='${SERVER_CONTAINER}'"
+echo "     ./test_worker.sh"
+echo ""
+echo "  2) Or just run ./test_worker.sh and enter them when prompted"
+echo "============================================================"
+echo ""
+echo "[+] Waiting for worker node to join cluster (timeout: 5 minutes) ..."
+echo "    Press Ctrl+C to skip worker wait and exit"
+
+# Wait for a worker node to join the cluster
+if docker exec "${SERVER_CONTAINER}" bash -c 'for i in {1..60}; do 
+  node_count=$(k3s kubectl get nodes --no-headers 2>/dev/null | wc -l)
+  if [ "$node_count" -gt 1 ]; then
+    echo "Worker node detected, waiting for Ready status..."
+    k3s kubectl get nodes --no-headers 2>/dev/null | grep -v "k3s-server" | grep -q "Ready" && exit 0
+  fi
+  sleep 5
+done; exit 1'; then
+  echo "✅ Worker node joined and is Ready!"
+  echo ""
+  echo "Final cluster status:"
+  docker exec "${SERVER_CONTAINER}" k3s kubectl get nodes -o wide
+  docker exec "${SERVER_CONTAINER}" k3s kubectl get pods -A
+else
+  echo "⚠️  No worker node joined within 5 minutes"
+  echo "   Server is ready for worker connections"
+fi 
