@@ -1,16 +1,11 @@
 #!/bin/bash
 # ------------------------------------------------------------------
-# Minimal bootstrap for an *edge* K3s agent
+# Minimal bootstrap for a K3s control-plane (server) node
 # ------------------------------------------------------------------
-# Render this script with the four env-vars below substituted at launch.
-#   K3S_URL         = https://<server-ip>:6443
-#   K3S_TOKEN       = <node-token from server>
-#   NODE_LABELS     = env=edge,tenant=<TENANT_ID>
-#   AGENT_EXTRA_ARGS= --flannel-backend=wireguard-native   (optional)
-#
-# Then feed it to cloud-init, user-data, or just run via SSH.
+# Required env vars (set via cloud-init or user-data):
+#   ENVIRONMENT        = prod|dev (optional, default prod)
+#   SERVER_EXTRA_ARGS  = optional extra args passed to the K3s server
 # ------------------------------------------------------------------
-
 set -euxo pipefail
 
 # ▶ 1. Basic tooling ------------------------------------------------
@@ -21,12 +16,11 @@ else
 fi
 pip3 install --no-cache-dir ansible
 
-# ▶ 2. Clean up any existing git state that might interfere with ansible-pull ------------------------------------
+# ▶ 2. Clean up any existing git state that might interfere with ansible-pull ----
 rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
 cd /tmp
 
 # ▶ 3. Install Galaxy deps ------------------------------------
-# Download requirements files first, then use local paths
 curl -o /tmp/requirements.yml https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
 ansible-galaxy collection install -r /tmp/requirements.yml
 ansible-galaxy role      install -r /tmp/requirements.yml
@@ -34,8 +28,6 @@ ansible-galaxy role      install -r /tmp/requirements.yml
 # ▶ 4. Run the Ansible pull-mode playbook ---------------------------
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
-  ansible/playbooks/k3s_worker.yml \
-  -e "k3s_url=$K3S_URL" \
-  -e "k3s_token=$K3S_TOKEN" \
-  -e "node_labels=$NODE_LABELS" \
-  -e "agent_extra_args=$AGENT_EXTRA_ARGS"
+  ansible/playbooks/k3s_server.yml \
+  -e "environment=${ENVIRONMENT:-prod}" \
+  -e "server_extra_args=${SERVER_EXTRA_ARGS:-}" 

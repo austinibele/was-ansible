@@ -1,0 +1,119 @@
+---
+- name: Join K3s worker and deploy WhatsApp workload
+  hosts: all
+  become: true
+
+  vars:
+    k3s_version: "v1.28.5+k3s1"
+    whatsapp_image: "{{ whatsapp_server_image_uri }}"
+    whatsapp_namespace: "whatsapp"
+
+  pre_tasks:
+    - name: Update system packages (Debian/Ubuntu)
+      apt:
+        upgrade: yes
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update system packages (RHEL/CentOS/Amazon Linux)
+      package:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Install required packages
+      package:
+        name:
+          - curl
+          - wget
+          - unzip
+          - git
+        state: present
+
+  roles:
+    - role: xanmanning.k3s
+      vars:
+        k3s_state: installed
+        k3s_type: agent
+        k3s_release_version: "{{ k3s_version }}"
+        k3s_server_url: "{{ k3s_url }}"
+        k3s_token: "{{ k3s_token }}"
+        k3s_agent_extra_args: "{{ agent_extra_args | default('') }}"
+        k3s_agent_node_labels: "{{ node_labels | default('env=edge') }}"
+        k3s_use_experimental: false
+
+  post_tasks:
+    - name: Wait for kubeconfig to exist
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        timeout: 120
+
+    - name: Create WhatsApp namespace
+      kubernetes.core.k8s:
+        name: "{{ whatsapp_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+
+    - name: Deploy WhatsApp server
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: whatsapp-server
+            namespace: "{{ whatsapp_namespace }}"
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: whatsapp-server
+            template:
+              metadata:
+                labels:
+                  app: whatsapp-server
+              spec:
+                nodeSelector:
+                  env: edge
+                hostNetwork: true
+                containers:
+                - name: whatsapp
+                  image: "{{ whatsapp_image }}"
+                  imagePullPolicy: Always
+                  ports:
+                  - containerPort: 21465
+                    hostPort: 21465
+                  env:
+                  - name: NODE_ENV
+                    value: "{{ environment }}"
+                  - name: PORT
+                    value: "21465"
+                  volumeMounts:
+                  - name: profiles
+                    mountPath: /app/profiles
+                  - name: tokens
+                    mountPath: /app/tokens
+                volumes:
+                - name: profiles
+                  hostPath:
+                    path: /opt/whatsapp/profiles
+                    type: DirectoryOrCreate
+                - name: tokens
+                  hostPath:
+                    path: /opt/whatsapp/tokens
+                    type: DirectoryOrCreate
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+
+    - name: Wait for WhatsApp deployment to be ready
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: whatsapp-server
+        namespace: "{{ whatsapp_namespace }}"
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        wait_condition:
+          type: Available
+          status: "True"
+        wait_timeout: 300 
