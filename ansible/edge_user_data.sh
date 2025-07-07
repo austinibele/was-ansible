@@ -27,9 +27,15 @@ rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
 # Change to a clean directory to avoid git submodule conflicts
 cd /tmp
 
+# --- install Galaxy deps ------------------------------------
+ansible-galaxy collection install -r https://raw.githubusercontent.com/austinibele/was-ansible/dev/ansible/requirements.yml
+ansible-galaxy role      install -r https://raw.githubusercontent.com/austinibele/was-ansible/dev/ansible/requirements.yml
+# -----------------------------------------------------------------
+
+# existing ansible-pull invocation
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
-  playbooks/k3s_agent.yml \
+  ansible/playbooks/k3s_agent.yml \
   -e "k3s_url=$K3S_URL" \
   -e "k3s_token=$K3S_TOKEN" \
   -e "node_labels=$NODE_LABELS" \
