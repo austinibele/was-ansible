@@ -6,7 +6,7 @@ IMAGE=${IMAGE:-jrei/systemd-ubuntu:22.04}
 NODE_LABELS=${NODE_LABELS:-"env=edge,tenant=test"}
 AGENT_EXTRA_ARGS=${AGENT_EXTRA_ARGS:-""}
 SCRIPT_START="$(date +%s%N)"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKER_CONTAINER="was-ansible-worker-${SCRIPT_START}"
 WHATSAPP_SERVER_IMAGE_URI=${WHATSAPP_SERVER_IMAGE_URI:-"349514606126.dkr.ecr.us-east-1.amazonaws.com/myvisausa/crm-api:whatsapp-server-prod-37e8793b207d6fd0d1fc1c122521d06a9b22629a"}
 
@@ -90,7 +90,7 @@ docker run \
   /sbin/init >/dev/null
 
 echo "[+] Bootstrapping worker..."
-docker exec "${WORKER_CONTAINER}" bash /workspace/bootstrap_worker.sh
+docker exec "${WORKER_CONTAINER}" bash /workspace/worker/bootstrap_worker.sh
 
 echo "[+] Worker bootstrap complete – cluster nodes:"
 docker exec "${SERVER_CONTAINER}" k3s kubectl get nodes -o wide
