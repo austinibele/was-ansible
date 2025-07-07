@@ -8,6 +8,7 @@ AGENT_EXTRA_ARGS=${AGENT_EXTRA_ARGS:-""}
 SCRIPT_START="$(date +%s%N)"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKER_CONTAINER="was-ansible-worker-${SCRIPT_START}"
+WHATSAPP_SERVER_IMAGE_URI=${WHATSAPP_SERVER_IMAGE_URI:-"349514606126.dkr.ecr.us-east-1.amazonaws.com/myvisausa/crm-api:whatsapp-server-prod-37e8793b207d6fd0d1fc1c122521d06a9b22629a"}
 
 # Function to prompt for value if not set
 prompt_for_value() {
@@ -49,6 +50,7 @@ prompt_for_value "NETWORK_NAME" "Docker network name" "was-ansible-net"
 prompt_for_value "K3S_URL" "K3s server URL" "https://172.19.0.2:6443"
 prompt_for_value "K3S_TOKEN" "K3s cluster token" "K108.dummy-token-string"
 prompt_for_value "SERVER_CONTAINER" "Server container name" ""
+prompt_for_value "WHATSAPP_SERVER_IMAGE_URI" "WhatsApp server image URI" "${WHATSAPP_SERVER_IMAGE_URI}"
 
 echo ""
 echo "Using the following configuration:"
@@ -83,6 +85,7 @@ docker run \
   -e K3S_TOKEN="${K3S_TOKEN}" \
   -e NODE_LABELS="${NODE_LABELS}" \
   -e AGENT_EXTRA_ARGS="${AGENT_EXTRA_ARGS}" \
+  -e WHATSAPP_SERVER_IMAGE_URI="${WHATSAPP_SERVER_IMAGE_URI}" \
   "${IMAGE}" \
   /sbin/init >/dev/null
 

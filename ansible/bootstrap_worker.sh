@@ -37,4 +37,5 @@ ansible-pull \
   -e "k3s_url=$K3S_URL" \
   -e "k3s_token=$K3S_TOKEN" \
   -e "node_labels=$NODE_LABELS" \
-  -e "agent_extra_args=$AGENT_EXTRA_ARGS"
+  -e "agent_extra_args=$AGENT_EXTRA_ARGS" \
+  -e "whatsapp_server_image_uri=${WHATSAPP_SERVER_IMAGE_URI:-}"

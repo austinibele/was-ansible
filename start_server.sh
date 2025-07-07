@@ -50,9 +50,6 @@ SERVER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{
 K3S_URL="https://${SERVER_IP}:6443"
 
 
-# Retrieve kubeconfig for local kubectl usage if desired
-docker cp "${SERVER_CONTAINER}:/etc/rancher/k3s/k3s.yaml" "${REPO_ROOT}/k3s-server-kubeconfig.yaml" >/dev/null 2>&1 || true
-
 echo ""
 echo "✅ Control-plane ready!"
 echo ""
