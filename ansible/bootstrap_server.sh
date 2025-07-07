@@ -9,6 +9,11 @@
 # ------------------------------------------------------------------
 set -euxo pipefail
 
+# Environment variable definitions with defaults
+ENVIRONMENT=${ENVIRONMENT:-"prod"}
+SERVER_EXTRA_ARGS=${SERVER_EXTRA_ARGS:-""}
+FORCE_UPDATE_DEPS=${FORCE_UPDATE_DEPS:-"false"}
+
 # ▶ 1. Update ansible dependencies if needed ------------------------
 if [ "${FORCE_UPDATE_DEPS:-false}" = "true" ] || [ ! -f /root/.ansible_deps_installed ]; then
   echo "Updating Ansible Galaxy dependencies..."

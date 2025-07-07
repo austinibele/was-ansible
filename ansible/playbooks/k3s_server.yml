@@ -7,11 +7,13 @@
   vars:
     # K3s configuration
     k3s_version: "v1.28.5+k3s1"
+    environment: "{{ environment | default('prod') }}"
+    server_extra_args: "{{ server_extra_args | default('') }}"
     k3s_server_config:
       disable:
         - traefik
       node-label:
-        - "environment={{ environment | default('prod') }}"
+        - "environment={{ environment }}"
 
   pre_tasks:
     - name: Update system packages (Debian/Ubuntu)
@@ -41,6 +43,7 @@
         k3s_state: installed
         k3s_release_version: "{{ k3s_version }}"
         k3s_server: "{{ k3s_server_config }}"
+        k3s_server_extra_args: "{{ server_extra_args }}"
         k3s_use_experimental: false
 
   post_tasks:

@@ -5,6 +5,9 @@ set -euo pipefail
 IMAGE=${IMAGE:-jrei/systemd-ubuntu:22.04}
 NETWORK_NAME=${NETWORK_NAME:-was-ansible-net}
 K3S_TOKEN=${K3S_TOKEN:-"K108.dummy-token-string"}
+ENVIRONMENT=${ENVIRONMENT:-"test"}
+SERVER_EXTRA_ARGS=${SERVER_EXTRA_ARGS:-"--token ${K3S_TOKEN}"}
+FORCE_UPDATE_DEPS=${FORCE_UPDATE_DEPS:-"false"}
 SCRIPT_START="$(date +%s%N)"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_CONTAINER="was-ansible-server-${SCRIPT_START}"
@@ -38,8 +41,9 @@ docker run \
   --hostname k3s-server \
   --volume "${REPO_ROOT}:/workspace:ro" \
   -e LANG=C.UTF-8 -e LC_ALL=C.UTF-8 \
-  -e ENVIRONMENT=test \
-  -e SERVER_EXTRA_ARGS="--token ${K3S_TOKEN}" \
+  -e ENVIRONMENT="${ENVIRONMENT}" \
+  -e SERVER_EXTRA_ARGS="${SERVER_EXTRA_ARGS}" \
+  -e FORCE_UPDATE_DEPS="${FORCE_UPDATE_DEPS}" \
   "${IMAGE}" \
   /sbin/init >/dev/null
 
