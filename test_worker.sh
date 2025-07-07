@@ -46,8 +46,8 @@ echo ""
 
 # Prompt for required values
 prompt_for_value "NETWORK_NAME" "Docker network name" "was-ansible-net"
-prompt_for_value "K3S_URL" "K3s server URL (e.g., https://172.18.0.2:6443)" ""
-prompt_for_value "K3S_TOKEN" "K3s cluster token" ""
+prompt_for_value "K3S_URL" "K3s server URL" "https://172.19.0.2:6443"
+prompt_for_value "K3S_TOKEN" "K3s cluster token" "K108.dummy-token-string"
 prompt_for_value "SERVER_CONTAINER" "Server container name" ""
 
 echo ""
