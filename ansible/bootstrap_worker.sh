@@ -31,6 +31,9 @@ cd /tmp
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
   ansible/playbooks/k3s_worker.yml \
+  -i "localhost," \
+  -l localhost \
+  -c local \
   -e "k3s_url=$K3S_URL" \
   -e "k3s_token=$K3S_TOKEN" \
   -e "node_labels=$NODE_LABELS" \
