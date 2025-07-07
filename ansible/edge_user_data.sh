@@ -28,8 +28,8 @@ rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
 cd /tmp
 
 # --- install Galaxy deps ------------------------------------
-ansible-galaxy collection install -r https://raw.githubusercontent.com/austinibele/was-ansible/dev/ansible/requirements.yml
-ansible-galaxy role      install -r https://raw.githubusercontent.com/austinibele/was-ansible/dev/ansible/requirements.yml
+ansible-galaxy collection install -r https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
+ansible-galaxy role      install -r https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
 # -----------------------------------------------------------------
 
 # existing ansible-pull invocation
