@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test_server.sh – spin up a single container running the K3s control-plane via our server_user_data.sh
+# test_server.sh – spin up a single container running the K3s control-plane via our bootstrap_server.sh
 set -euo pipefail
 
 IMAGE=${IMAGE:-jrei/systemd-ubuntu:22.04}
@@ -44,7 +44,7 @@ docker run \
   /sbin/init >/dev/null
 
 echo "[+] Running server bootstrap..."
-docker exec "${SERVER_CONTAINER}" bash /workspace/ansible/server_user_data.sh
+docker exec "${SERVER_CONTAINER}" bash /workspace/ansible/bootstrap_server.sh
 
 SERVER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${SERVER_CONTAINER}")
 K3S_URL="https://${SERVER_IP}:6443"

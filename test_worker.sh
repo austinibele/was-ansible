@@ -41,7 +41,7 @@ docker run \
   /sbin/init >/dev/null
 
 echo "[+] Bootstrapping worker..."
-docker exec "${WORKER_CONTAINER}" bash /workspace/ansible/edge_user_data.sh
+docker exec "${WORKER_CONTAINER}" bash /workspace/ansible/bootstrap_worker.sh
 
 echo "[+] Waiting for worker node to report Ready ..."
 if ! docker exec "${SERVER_CONTAINER}" bash -c 'for i in {1..36}; do k3s kubectl get nodes --no-headers 2>/dev/null | grep -q "k3s-worker.*Ready" && exit 0; sleep 5; done; exit 1'; then
