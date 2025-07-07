@@ -21,15 +21,17 @@ else
 fi
 pip3 install --no-cache-dir ansible
 
+# ▶ 2. Clean up any existing git state that might interfere with ansible-pull ------------------------------------
+rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
+cd /tmp
 
-# --- install Galaxy deps ------------------------------------
+# ▶ 3. Install Galaxy deps ------------------------------------
 # Download requirements files first, then use local paths
 curl -o /tmp/requirements.yml https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
 ansible-galaxy collection install -r /tmp/requirements.yml
 ansible-galaxy role      install -r /tmp/requirements.yml
-# -----------------------------------------------------------------
 
-# existing ansible-pull invocation
+# ▶ 4. Run the Ansible pull-mode playbook ---------------------------
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
   ansible/playbooks/k3s_agent.yml \
