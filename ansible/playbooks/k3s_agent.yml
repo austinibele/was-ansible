@@ -15,9 +15,6 @@
     whatsapp_image: "{{ whatsapp_server_image_uri }}"
     whatsapp_namespace: "whatsapp"
     
-    # CloudWatch configuration (for AWS environments)
-    cloudwatch_agent_enabled: "{{ environment == 'prod' }}"
-    
   pre_tasks:
     - name: Update system packages (RHEL/CentOS/Amazon Linux)
       package:
@@ -41,7 +38,6 @@
         state: present
 
   roles:
-    # Install and configure K3s using community role
     - role: xanmanning.k3s
       vars:
         k3s_state: installed
@@ -49,18 +45,6 @@
         k3s_server: "{{ k3s_server_config }}"
         k3s_use_experimental: false
         
-    # Install CloudWatch agent for production monitoring
-    - role: cisagov.cloudwatch_agent
-      when: cloudwatch_agent_enabled
-      vars:
-        cloudwatch_agent_config:
-          logs:
-            logs_collected:
-              files:
-                collect_list:
-                  - file_path: "/var/log/k3s.log"
-                    log_group_name: "/aws/ec2/k3s"
-                    log_stream_name: "{instance_id}"
 
   post_tasks:
     - name: Wait for K3s to be ready
