@@ -15,7 +15,7 @@ Instead of installing Ansible + Galaxy dependencies on every container boot (whi
 
 ```bash
 # Build the optimized base image
-./build-base-image.sh
+./docker/build-base-image.sh
 
 # Or with custom name/tag
 IMAGE_NAME=my-ansible-base IMAGE_TAG=v1.0 ./build-base-image.sh
