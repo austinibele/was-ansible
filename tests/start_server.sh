@@ -48,7 +48,7 @@ docker run \
   /sbin/init >/dev/null
 
 echo "[+] Running server bootstrap..."
-docker exec "${SERVER_CONTAINER}" bash /workspace/ansible/bootstrap_server.sh
+docker exec "${SERVER_CONTAINER}" bash /workspace/server/bootstrap_server.sh
 
 SERVER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${SERVER_CONTAINER}")
 K3S_URL="https://${SERVER_IP}:6443"

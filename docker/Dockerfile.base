@@ -23,17 +23,8 @@ RUN ansible-galaxy collection install -r /tmp/requirements.yml \
     && rm /tmp/requirements.yml \
     && touch /root/.ansible_deps_installed
 
-# Create a script to update dependencies when needed
-COPY <<EOF /usr/local/bin/update-ansible-deps.sh
-#!/bin/bash
-set -euo pipefail
-echo "Checking for updated Ansible dependencies..."
-curl -o /tmp/requirements.yml https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
-ansible-galaxy collection install -r /tmp/requirements.yml --upgrade
-ansible-galaxy role install -r /tmp/requirements.yml --force
-rm /tmp/requirements.yml
-echo "Dependencies updated successfully"
-EOF
+# Copy the update dependencies script
+COPY bin/update-ansible-deps.sh /usr/local/bin/update-ansible-deps.sh
 
 RUN chmod +x /usr/local/bin/update-ansible-deps.sh
 
