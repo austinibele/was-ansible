@@ -77,6 +77,8 @@ docker run \
   --hostname k3s-server \
   --volume "${REPO_ROOT}:/workspace:ro" \
   -e ENVIRONMENT=test \
+  -e LANG=C.UTF-8 \
+  -e LC_ALL=C.UTF-8 \
   -e SERVER_EXTRA_ARGS="--token ${K3S_TOKEN}" \
   "${IMAGE}" \
   /sbin/init >/dev/null
@@ -114,6 +116,8 @@ docker run \
   -e K3S_TOKEN="${K3S_TOKEN}" \
   -e NODE_LABELS="${NODE_LABELS}" \
   -e AGENT_EXTRA_ARGS="${AGENT_EXTRA_ARGS}" \
+  -e LANG=C.UTF-8 \
+  -e LC_ALL=C.UTF-8 \
   "${IMAGE}" \
   /sbin/init >/dev/null
 

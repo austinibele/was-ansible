@@ -11,6 +11,8 @@ set -euxo pipefail
 # ▶ 1. Basic tooling ------------------------------------------------
 if command -v apt-get &>/dev/null; then
   apt-get update -y && apt-get install -y python3-pip git curl
+  # Ensure netcat for port checks
+  apt-get install -y netcat-openbsd
 else
   yum install -y python3-pip git curl
 fi
@@ -29,5 +31,6 @@ ansible-galaxy role      install -r /tmp/requirements.yml
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
   ansible/playbooks/k3s_server.yml \
+  -l localhost \
   -e "environment=${ENVIRONMENT:-prod}" \
   -e "server_extra_args=${SERVER_EXTRA_ARGS:-}" 
