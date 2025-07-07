@@ -15,12 +15,11 @@ set -euxo pipefail
 
 # ▶ 1. Basic tooling ------------------------------------------------
 if command -v apt-get &>/dev/null; then
-  apt-get update -y && apt-get install -y python3-pip git
+  apt-get update -y && apt-get install -y python3-pip git curl
 else
-  yum install -y python3-pip git
+  yum install -y python3-pip git curl
 fi
 pip3 install --no-cache-dir ansible
-
 
 
 # --- install Galaxy deps ------------------------------------
