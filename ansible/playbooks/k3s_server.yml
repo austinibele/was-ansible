@@ -1,7 +1,8 @@
 ---
 - name: Install and configure K3s server (control-plane)
-  hosts: all
+  hosts: localhost
   become: true
+  connection: local
 
   vars:
     # K3s configuration
