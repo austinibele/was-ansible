@@ -26,7 +26,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 
 # Configurable parameters (override with env vars)
-IMAGE=${IMAGE:-ubuntu:22.04}
+IMAGE=${IMAGE:-jrei/systemd-ubuntu:22.04}
 K3S_TOKEN=${K3S_TOKEN:-"K108.dummy-token-string"}
 NODE_LABELS=${NODE_LABELS:-"env=edge,tenant=test"}
 AGENT_EXTRA_ARGS=${AGENT_EXTRA_ARGS:-""}
@@ -69,9 +69,10 @@ docker run \
   --name "${SERVER_CONTAINER}" \
   --privileged \
   --cgroupns host \
+  --security-opt seccomp=unconfined \
   --detach \
   --tmpfs /run --tmpfs /run/lock \
-  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
   --network "${NETWORK_NAME}" \
   --hostname k3s-server \
   --volume "${REPO_ROOT}:/workspace:ro" \
@@ -102,9 +103,10 @@ docker run \
   --name "${WORKER_CONTAINER}" \
   --privileged \
   --cgroupns host \
+  --security-opt seccomp=unconfined \
   --detach \
   --tmpfs /run --tmpfs /run/lock \
-  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
   --network "${NETWORK_NAME}" \
   --hostname k3s-worker \
   --volume "${REPO_ROOT}:/workspace:ro" \
