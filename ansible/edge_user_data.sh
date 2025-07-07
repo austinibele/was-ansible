@@ -15,7 +15,13 @@ set -euxo pipefail
 
 # ▶ 1. Basic tooling ------------------------------------------------
 if command -v apt-get &>/dev/null; then
-  apt-get update -y && apt-get install -y python3-pip git curl
+  export DEBIAN_FRONTEND=noninteractive
+  for i in {1..3}; do
+    echo "[edge bootstrap] apt attempt $i ..."
+    apt-get update -y --fix-missing && \
+      apt-get install -y --no-install-recommends python3-pip git curl netcat-openbsd && break
+    echo "[edge bootstrap] apt failed, retrying in 5s" && sleep 5
+  done
 else
   yum install -y python3-pip git curl
 fi

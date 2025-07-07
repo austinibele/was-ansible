@@ -3,9 +3,10 @@
 set -euo pipefail
 
 IMAGE=${IMAGE:-jrei/systemd-ubuntu:22.04}
-NETWORK_NAME=${NETWORK_NAME:?Set NETWORK_NAME same as server network}
-K3S_URL=${K3S_URL:?Set to https://<server-ip>:6443}
-K3S_TOKEN=${K3S_TOKEN:?Set token used by server}
+NETWORK_NAME=${NETWORK_NAME:-was-ansible-net}
+K3S_URL=${K3S_URL:-https://127.0.0.1:6443}
+K3S_TOKEN=${K3S_TOKEN:-K108.dummy-token-string}
+SERVER_CONTAINER=${SERVER_CONTAINER:-$(docker ps -qf "name=was-ansible-server")}
 NODE_LABELS=${NODE_LABELS:-"env=edge,tenant=test"}
 AGENT_EXTRA_ARGS=${AGENT_EXTRA_ARGS:-""}
 SCRIPT_START="$(date +%s%N)"
@@ -42,4 +43,11 @@ docker run \
 echo "[+] Bootstrapping worker..."
 docker exec "${WORKER_CONTAINER}" bash /workspace/ansible/edge_user_data.sh
 
-echo "[+] Worker bootstrap complete – check server nodes list." 
+echo "[+] Waiting for worker node to report Ready ..."
+if ! docker exec "${SERVER_CONTAINER}" bash -c 'for i in {1..36}; do k3s kubectl get nodes --no-headers 2>/dev/null | grep -q "k3s-worker.*Ready" && exit 0; sleep 5; done; exit 1'; then
+  echo "❌ Worker node did not become Ready in 3 minutes" && exit 1
+fi
+
+echo "[+] Worker bootstrap complete – cluster nodes:"
+docker exec "${SERVER_CONTAINER}" k3s kubectl get nodes -o wide
+docker exec "${SERVER_CONTAINER}" k3s kubectl get pods -A 
