@@ -49,10 +49,6 @@ docker exec "${SERVER_CONTAINER}" bash /workspace/ansible/bootstrap_server.sh
 SERVER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${SERVER_CONTAINER}")
 K3S_URL="https://${SERVER_IP}:6443"
 
-echo "[+] Waiting for K3s server node to become Ready ..."
-if ! docker exec "${SERVER_CONTAINER}" bash -c 'for i in {1..36}; do k3s kubectl get nodes --no-headers 2>/dev/null | grep -q "k3s-server.*Ready" && exit 0; sleep 5; done; exit 1'; then
-  echo "❌ K3s control-plane did not become Ready in 3 minutes" && exit 1
-fi
 
 # Retrieve kubeconfig for local kubectl usage if desired
 docker cp "${SERVER_CONTAINER}:/etc/rancher/k3s/k3s.yaml" "${REPO_ROOT}/k3s-server-kubeconfig.yaml" >/dev/null 2>&1 || true

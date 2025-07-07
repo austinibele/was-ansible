@@ -7,37 +7,27 @@
 #   K3S_TOKEN       = <node-token from server>
 #   NODE_LABELS     = env=edge,tenant=<TENANT_ID>
 #   AGENT_EXTRA_ARGS= --flannel-backend=wireguard-native   (optional)
+#   FORCE_UPDATE_DEPS = true to force update of ansible dependencies
 #
 # Then feed it to cloud-init, user-data, or just run via SSH.
 # ------------------------------------------------------------------
 
 set -euxo pipefail
 
-# ▶ 1. Basic tooling ------------------------------------------------
-if command -v apt-get &>/dev/null; then
-  export DEBIAN_FRONTEND=noninteractive
-  for i in {1..3}; do
-    echo "[edge bootstrap] apt attempt $i ..."
-    apt-get update -y --fix-missing && \
-      apt-get install -y --no-install-recommends python3-pip git curl netcat-openbsd && break
-    echo "[edge bootstrap] apt failed, retrying in 5s" && sleep 5
-  done
+# ▶ 1. Update ansible dependencies if needed ------------------------
+if [ "${FORCE_UPDATE_DEPS:-false}" = "true" ] || [ ! -f /root/.ansible_deps_installed ]; then
+  echo "Updating Ansible Galaxy dependencies..."
+  /usr/local/bin/update-ansible-deps.sh
+  touch /root/.ansible_deps_installed
 else
-  yum install -y python3-pip git curl
+  echo "Ansible dependencies already installed, skipping update..."
 fi
-pip3 install --no-cache-dir ansible
 
 # ▶ 2. Clean up any existing git state that might interfere with ansible-pull ------------------------------------
 rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
 cd /tmp
 
-# ▶ 3. Install Galaxy deps ------------------------------------
-# Download requirements files first, then use local paths
-curl -o /tmp/requirements.yml https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
-ansible-galaxy collection install -r /tmp/requirements.yml
-ansible-galaxy role      install -r /tmp/requirements.yml
-
-# ▶ 4. Run the Ansible pull-mode playbook ---------------------------
+# ▶ 3. Run the Ansible pull-mode playbook ---------------------------
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
   ansible/playbooks/k3s_worker.yml \

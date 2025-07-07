@@ -5,29 +5,24 @@
 # Required env vars (set via cloud-init or user-data):
 #   ENVIRONMENT        = prod|dev (optional, default prod)
 #   SERVER_EXTRA_ARGS  = optional extra args passed to the K3s server
+#   FORCE_UPDATE_DEPS  = true to force update of ansible dependencies
 # ------------------------------------------------------------------
 set -euxo pipefail
 
-# ▶ 1. Basic tooling ------------------------------------------------
-if command -v apt-get &>/dev/null; then
-  apt-get update -y && apt-get install -y python3-pip git curl
-  # Ensure netcat for port checks
-  apt-get install -y netcat-openbsd
+# ▶ 1. Update ansible dependencies if needed ------------------------
+if [ "${FORCE_UPDATE_DEPS:-false}" = "true" ] || [ ! -f /root/.ansible_deps_installed ]; then
+  echo "Updating Ansible Galaxy dependencies..."
+  /usr/local/bin/update-ansible-deps.sh
+  touch /root/.ansible_deps_installed
 else
-  yum install -y python3-pip git curl
+  echo "Ansible dependencies already installed, skipping update..."
 fi
-pip3 install --no-cache-dir ansible
 
 # ▶ 2. Clean up any existing git state that might interfere with ansible-pull ----
 rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
 cd /tmp
 
-# ▶ 3. Install Galaxy deps ------------------------------------
-curl -o /tmp/requirements.yml https://raw.githubusercontent.com/austinibele/was-ansible/refs/heads/main/ansible/requirements.yml
-ansible-galaxy collection install -r /tmp/requirements.yml
-ansible-galaxy role      install -r /tmp/requirements.yml
-
-# ▶ 4. Run the Ansible pull-mode playbook ---------------------------
+# ▶ 3. Run the Ansible pull-mode playbook ---------------------------
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
   ansible/playbooks/k3s_server.yml \
