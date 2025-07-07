@@ -22,6 +22,11 @@ fi
 pip3 install --no-cache-dir ansible
 
 # ▶ 2. Run the Ansible pull-mode playbook ---------------------------
+# Clean up any existing git state that might interfere with ansible-pull
+rm -rf /root/.ansible/pull/was-ansible 2>/dev/null || true
+# Change to a clean directory to avoid git submodule conflicts
+cd /tmp
+
 ansible-pull \
   -U https://github.com/austinibele/was-ansible.git \
   playbooks/k3s_agent.yml \
