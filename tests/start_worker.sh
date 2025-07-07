@@ -90,7 +90,7 @@ docker run \
   /sbin/init >/dev/null
 
 echo "[+] Bootstrapping worker..."
-docker exec "${WORKER_CONTAINER}" bash /workspace/ansible/bootstrap_worker.sh
+docker exec "${WORKER_CONTAINER}" bash /workspace/bootstrap_worker.sh
 
 echo "[+] Worker bootstrap complete – cluster nodes:"
 docker exec "${SERVER_CONTAINER}" k3s kubectl get nodes -o wide
